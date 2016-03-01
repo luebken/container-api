@@ -59,5 +59,7 @@ func main() {
 		fmt.Println("|     - ", key, value)
 	}
 	fmt.Println(" -----------------------------------------------------------")
-	// hooks
+	// TODO
+	// add lifecyle hooks
+	// add args
 }
