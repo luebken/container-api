@@ -48,8 +48,8 @@ func main() {
 		log.Printf("Error while InspectImage error: %v\n", err)
 		os.Exit(1)
 	}
-    
-    // -- image analysis --
+
+	// -- image analysis --
 	fmt.Println(" -----------------------------------------------------------")
 	fmt.Println("| Image: ", imageName)
 	fmt.Println("|-----------------------------------------------------------")
@@ -58,6 +58,7 @@ func main() {
 	fmt.Println("| Created: ", img.Created.Format("2006-01-02 15:04"))
 	fmt.Println("|-----------------------------------------------------------")
 	fmt.Println("| Container API:")
+	fmt.Println("|")
 	fmt.Println("| * Mandatory ENVs to configure:  ")
 
 	var dat []map[string]interface{}
@@ -71,12 +72,15 @@ func main() {
 		fmt.Println("|   - Description:  ", o["description"])
 		fmt.Println("|   - Mandatory:    ", o["mandatory"])
 	}
+	fmt.Println("|")
 	fmt.Println("| * Optional ENVs to configure:  ")
 	fmt.Println("|     - < empty >  ") //TODO
+	fmt.Println("|")
 	fmt.Println("| * Available ports:   ")
 	for key, value := range img.Config.ExposedPorts {
 		fmt.Println("|     - ", key, value)
 	}
+	fmt.Println("|")
 	fmt.Println("| * Volumes:   ")
 	for key, value := range img.Config.Volumes {
 		fmt.Println("|     - ", key, value)
