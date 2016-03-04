@@ -10,23 +10,35 @@ The container image build from this [Dockerfile](https://github.com/luebken/curr
 ```
 $ container-api luebken/currentweather-nodejs
  -----------------------------------------------------------
-| Image:  luebken/currentweather-nodejs
+| Image:  luebken/currentweather-nodejs:latest
 |-----------------------------------------------------------
-| Author:   Matthias Luebken, matthias@luebken.com
+| Author:   matthias.luebken@gmail.com
 | Size:     158 MB
-| Created:  2016-03-01 15:59
+| Created:  2016-03-04 11:24
 |-----------------------------------------------------------
 | Container API:
-| * Mandatory ENVs to configure:
+|
+| * Expected Links:
+|   - Name:          redis:latest
+|   - Port:          1337
+|   - Description:   Needed for requests caching
+|   - Mandatory:     true
+|
+| * Expected ENVs:
 |   - ENV:           OPENWEATHERMAP_APIKEY
 |   - Description:   APIKEY to access the OpenWeatherMap. Get one at http://openweathermap.org/appid
 |   - Mandatory:     true
-| * Optional ENVs to configure:
-|     - < empty >
+|
+| * Expected args:
+|   - Arg:           -q QUERY
+|   - Description:   The query for openweathermap.
+|
 | * Available ports:
 |     -  1337/tcp {}
+|
 | * Volumes:
  -----------------------------------------------------------
+
 ```
 
 ### Build and use
