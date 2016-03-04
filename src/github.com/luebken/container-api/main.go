@@ -59,13 +59,23 @@ func main() {
 	fmt.Println("|-----------------------------------------------------------")
 	fmt.Println("| Container API:")
 	fmt.Println("|")
-	fmt.Println("| * Mandatory ENVs to configure:  ")
-
 	var dat []map[string]interface{}
-	availableEnvs := img.Config.Labels["api.expected-envs"]
-
-	if err := json.Unmarshal([]byte(availableEnvs), &dat); err != nil {
-		panic(err)
+	fmt.Println("| * Expected Links:  ")
+	expectedLinks := img.Config.Labels["api.expected-links"]
+	if err := json.Unmarshal([]byte(expectedLinks), &dat); err != nil {
+		fmt.Printf("|   'Couldn't parse: %v'\n", err)
+	}
+	for _, o := range dat {
+		fmt.Println("|   - Name:         ", o["name"])
+		fmt.Println("|   - Port:         ", o["port"])
+		fmt.Println("|   - Description:  ", o["description"])
+		fmt.Println("|   - Mandatory:    ", o["mandatory"])
+	}
+	fmt.Println("|")
+	fmt.Println("| * Expected ENVs:  ")
+	expectedEnvs := img.Config.Labels["api.expected-envs"]
+	if err := json.Unmarshal([]byte(expectedEnvs), &dat); err != nil {
+		fmt.Printf("|   'Couldn't parse: %v'\n", err)
 	}
 	for _, o := range dat {
 		fmt.Println("|   - ENV:          ", o["key"])
@@ -73,8 +83,15 @@ func main() {
 		fmt.Println("|   - Mandatory:    ", o["mandatory"])
 	}
 	fmt.Println("|")
-	fmt.Println("| * Optional ENVs to configure:  ")
-	fmt.Println("|     - < empty >  ") //TODO
+	fmt.Println("| * Expected args:  ")
+	expectedArgs := img.Config.Labels["api.expected-args"]
+	if err := json.Unmarshal([]byte(expectedArgs), &dat); err != nil {
+		fmt.Printf("|   'Couldn't parse: %v'\n", err)
+	}
+	for _, o := range dat {
+		fmt.Println("|   - Arg:          ", o["arg"])
+		fmt.Println("|   - Description:  ", o["description"])
+	}
 	fmt.Println("|")
 	fmt.Println("| * Available ports:   ")
 	for key, value := range img.Config.ExposedPorts {
