@@ -1,10 +1,11 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"os"
+	"regexp"
+	"strings"
 
 	"github.com/fsouza/go-dockerclient"
 )
@@ -59,40 +60,48 @@ func main() {
 	fmt.Println("|-----------------------------------------------------------")
 	fmt.Println("| Container API:")
 	fmt.Println("|")
-	var dat []map[string]interface{}
-	fmt.Println("| * Expected Links:  ")
-	expectedLinks := img.Config.Labels["api.expected-links"]
-	if err := json.Unmarshal([]byte(expectedLinks), &dat); err != nil {
-		fmt.Printf("|   'Couldn't parse: %v'\n", err)
-	}
-	for _, o := range dat {
-		fmt.Println("|   - Name:         ", o["name"])
-		fmt.Println("|   - Port:         ", o["port"])
-		fmt.Println("|   - Description:  ", o["description"])
-		fmt.Println("|   - Mandatory:    ", o["mandatory"])
-	}
+	fmt.Println("| * Required Links:  ")
+	fmt.Println("|   - Name:         TODO")
 	fmt.Println("|")
-	fmt.Println("| * Expected ENVs:  ")
-	expectedEnvs := img.Config.Labels["api.expected-envs"]
-	if err := json.Unmarshal([]byte(expectedEnvs), &dat); err != nil {
-		fmt.Printf("|   'Couldn't parse: %v'\n", err)
+	fmt.Println("| * Required ENVs:  ")
+	labels := img.Config.Labels
+
+	//envs as a map
+	envMap := make(map[string]string)
+	for _, envLine := range img.Config.Env {
+		s := strings.Split(envLine, "=")
+		envMap[s[0]] = s[1]
 	}
-	for _, o := range dat {
-		fmt.Println("|   - ENV:          ", o["key"])
-		fmt.Println("|   - Description:  ", o["description"])
-		fmt.Println("|   - Mandatory:    ", o["mandatory"])
+
+	//parsing labels for "api.ENV" declarations
+	envsInLabels := []string{}
+	for label := range labels {
+		r1, _ := regexp.Compile("(api.ENV).(.*)")
+		envLabel := r1.FindStringSubmatch(label)
+		if len(envLabel) > 2 {
+			r2, _ := regexp.Compile("^[^.]*$") //no dots => ENV key
+			values := r2.FindStringSubmatch(envLabel[2])
+			if len(values) > 0 {
+				envsInLabels = append(envsInLabels, values[0])
+			}
+		}
 	}
+
+	// printing env and documentation
+	for _, env := range envsInLabels {
+		fmt.Printf("|   - %v\n", env)
+		fmt.Printf("|     > default value : %v\n", envMap[env])
+		for label := range labels {
+			r1, _ := regexp.Compile("(api.ENV." + env + ").(.*)")
+			envLabel := r1.FindStringSubmatch(label)
+			if len(envLabel) > 2 {
+				fmt.Printf("|     > %-14v: %v\n", envLabel[2], labels[envLabel[0]])
+			}
+		}
+	}
+
 	fmt.Println("|")
-	fmt.Println("| * Expected args:  ")
-	expectedArgs := img.Config.Labels["api.expected-args"]
-	if err := json.Unmarshal([]byte(expectedArgs), &dat); err != nil {
-		fmt.Printf("|   'Couldn't parse: %v'\n", err)
-	}
-	for _, o := range dat {
-		fmt.Println("|   - Arg:          ", o["arg"])
-		fmt.Println("|   - Description:  ", o["description"])
-	}
-	fmt.Println("|")
+
 	fmt.Println("| * Available ports:   ")
 	for key, value := range img.Config.ExposedPorts {
 		fmt.Println("|     - ", key, value)
